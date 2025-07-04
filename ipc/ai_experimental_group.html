@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI辅助科研实验组</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .main-container {
+            display: flex;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: calc(100vh - 40px);
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-width: calc(100% - 450px);
+        }
+        
+        .ai-chat-area {
+            width: 450px;
+            background: #f8f9fa;
+            border-left: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 40px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .progress-container {
+            margin-bottom: 30px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e0e7ff;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .dimension-navigation {
+            margin-bottom: 30px;
+        }
+        
+        .dimension-nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .dimension-nav-tab {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dimension-nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .dimension-nav-tab:hover::before {
+            left: 100%;
+        }
+        
+        .dimension-nav-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-tab-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .nav-tab-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .nav-tab-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .dimension {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .dimension.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dimension-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+        
+        .dimension-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .dimension-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .dimension-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .dimension-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 12px;
+        }
+        
+        .dimension-tab {
+            flex: 1;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .dimension-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .dimension-step {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #f0f0f0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .dimension-step.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .step-icon {
+            font-size: 2rem;
+            color: #667eea;
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .step-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .ai-guidance {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .ai-guidance h5 {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .ai-icon {
+            font-size: 1.3rem;
+        }
+        
+        .ai-guidance ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .ai-guidance li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            font-weight: 600;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .ai-suggestions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .ai-suggestions h6 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .suggestion-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .suggestion-item:hover {
+            background: #e3f2fd;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        /* AI聊天区域样式 */
+        .chat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: white;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .message.ai .message-avatar {
+            background: #f8f9fa;
+            color: #667eea;
+        }
+        
+        .message-content {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .chat-input {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            flex-shrink: 0;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+        
+        .chat-send {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .quick-question {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-question:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .ai-feedback-area {
+            display: none;
+            margin-top: 25px;
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .ai-feedback-area h4 {
+            color: #28a745;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feedback-content {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .content-area {
+                max-width: 100%;
+            }
+            
+            .ai-chat-area {
+                width: 100%;
+                height: 400px;
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- 主要内容区域 -->
+        <div class="content-area">
+            <div class="header">
+                <h1>🤖 AI辅助科研实验组</h1>
+                <p>体验AI导师的智能指导，获得个性化的科研训练</p>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="ai-progress"></div>
+                </div>
+                <div class="progress-text">学习进度: <span id="progress-percentage">0%</span></div>
+            </div>
+            
+            <!-- 维度导航 -->
+            <div class="dimension-navigation">
+                <h3>🎯 选择学习维度</h3>
+                <p>AI导师将根据你的选择提供个性化指导：</p>
+                <div class="dimension-nav-tabs">
+                    <button class="dimension-nav-tab active" onclick="showAIDimension('ai-dimension1')">
+                        <span class="nav-tab-icon">🔬</span>
+                        <div class="nav-tab-title">科研实践能力</div>
+                        <div class="nav-tab-desc">AI指导科研技能</div>
+                    </button>
+                    <button class="dimension-nav-tab" onclick="showAIDimension('ai-dimension2')">
+                        <span class="nav-tab-icon">📚</span>
+                        <div class="nav-tab-title">拓展内容知识</div>
+                        <div class="nav-tab-desc">AI推荐学习资源</div>
+                    </button>
+                    <button class="dimension-nav-tab" onclick="showAIDimension('ai-dimension3')">
+                        <span class="nav-tab-icon">🔍</span>
+                        <div class="nav-tab-title">理解科学本质</div>
+                        <div class="nav-tab-desc">AI培养科学思维</div>
+                    </button>
+                    <button class="dimension-nav-tab" onclick="showAIDimension('ai-dimension4')">
+                        <span class="nav-tab-icon">🎯</span>
+                        <div class="nav-tab-title">发展身份认同</div>
+                        <div class="nav-tab-desc">AI规划职业发展</div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 维度内容区域 -->
+            <div class="research-dimensions">
+                <!-- 维度1: 科研实践能力提升 -->
+                <div class="dimension active" id="ai-dimension1">
+                    <div class="dimension-header">
+                        <div class="dimension-number">1</div>
+                        <div>
+                            <div class="dimension-title">科研实践能力提升 (Develop Practices)</div>
+                            <div class="dimension-description">AI导师将帮助你提升科研实践技能，包括问题提出、实验设计、数据分析等核心能力</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dimension-tabs">
+                        <button class="dimension-tab active" onclick="showAIDimensionStep('ai-step1-1')">激发想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step1-2')">添加想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step1-3')">区分想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step1-4')">反思</button>
+                    </div>
+                    
+                    <!-- 步骤1-1: 激发想法 -->
+                    <div id="ai-step1-1" class="dimension-step active">
+                        <div class="step-header">
+                            <div class="step-icon">🔍</div>
+                            <div>
+                                <div class="step-title">激发想法</div>
+                                <div class="step-description">在实验室研究目标背景下，识别或提出一个研究问题</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请结合实验室的研究目标，识别或提出一个你感兴趣的研究问题。</p>
+                            <p><strong>💡 AI建议：</strong>建议从实际科研现象出发，结合团队目标，提出具有创新性和可行性的问题。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-practice-question">请描述你提出的研究问题：</label>
+                            <textarea id="ai-practice-question" rows="4" placeholder="请描述你提出的研究问题"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep1()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何提出有价值的研究问题')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤1-2: 添加想法 -->
+                    <div id="ai-step1-2" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🧪</div>
+                            <div>
+                                <div class="step-title">添加想法</div>
+                                <div class="step-description">开展实验，收集和整理数据</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请开展实验，收集并整理相关数据。</p>
+                            <p><strong>💡 AI建议：</strong>注意实验步骤的规范性，数据要及时整理归档。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-practice-data">请记录你的实验过程和数据收集情况：</label>
+                            <textarea id="ai-practice-data" rows="4" placeholder="请记录你的实验过程和数据收集情况"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep2()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('实验数据如何整理')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤1-3: 区分想法 -->
+                    <div id="ai-step1-3" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">📊</div>
+                            <div>
+                                <div class="step-title">区分想法</div>
+                                <div class="step-description">分析和解释数据，评估证据，批判结论</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请分析和解释你的实验数据，评估证据，并对结论进行批判性思考。</p>
+                            <p><strong>💡 AI建议：</strong>尝试多角度分析数据，发现潜在问题或局限。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-practice-analysis">请填写你的数据分析、证据评估和结论批判：</label>
+                            <textarea id="ai-practice-analysis" rows="4" placeholder="请填写你的数据分析、证据评估和结论批判"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep3()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何批判性分析实验数据')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤1-4: 反思 -->
+                    <div id="ai-step1-4" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">📝</div>
+                            <div>
+                                <div class="step-title">反思</div>
+                                <div class="step-description">得出最终结论并规划下一步</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请总结你的最终结论，并规划下一步研究计划。</p>
+                            <p><strong>💡 AI建议：</strong>反思整个过程，明确下一步目标。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-practice-reflect">请写下你的结论和后续计划：</label>
+                            <textarea id="ai-practice-reflect" rows="4" placeholder="请写下你的结论和后续计划"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="completeAIExperiment()">完成AI实验</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何规划后续研究')">咨询AI导师</button>
+                    </div>
+                </div>
+                
+                <!-- 维度2: 拓展内容知识 -->
+                <div class="dimension" id="ai-dimension2">
+                    <div class="dimension-header">
+                        <div class="dimension-number">2</div>
+                        <div>
+                            <div class="dimension-title">拓展内容知识 (Expand Content Knowledge)</div>
+                            <div class="dimension-description">AI导师将帮助你拓展专业知识，建立系统的知识体系，推荐个性化学习资源</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dimension-tabs">
+                        <button class="dimension-tab active" onclick="showAIDimensionStep('ai-step2-1')">激发想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step2-2')">添加想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step2-3')">区分想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step2-4')">反思</button>
+                    </div>
+                    
+                    <!-- 步骤2-1: 激发想法 -->
+                    <div id="ai-step2-1" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">💡</div>
+                            <div>
+                                <div class="step-title">激发想法</div>
+                                <div class="step-description">针对研究主题提出假设和问题</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请针对你的研究主题，提出假设和相关科学问题。</p>
+                            <p><strong>💡 AI建议：</strong>多查阅文献，结合前沿动态提出有价值的问题。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-knowledge-hypothesis">请写下你的假设和问题：</label>
+                            <textarea id="ai-knowledge-hypothesis" rows="4" placeholder="请写下你的假设和问题"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep1()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何提出有价值的假设')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤2-2: 添加想法 -->
+                    <div id="ai-step2-2" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">📚</div>
+                            <div>
+                                <div class="step-title">添加想法</div>
+                                <div class="step-description">阅读文献，参加研讨会，与团队讨论</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请阅读相关文献，参加学术研讨会，并与研究团队讨论。</p>
+                            <p><strong>💡 AI建议：</strong>主动与团队成员交流，获取多元观点。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-knowledge-activity">请记录你阅读的文献、参加的活动和讨论要点：</label>
+                            <textarea id="ai-knowledge-activity" rows="4" placeholder="请记录你阅读的文献、参加的活动和讨论要点"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep2()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何高效获取学术资源')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤2-3: 区分想法 -->
+                    <div id="ai-step2-3" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🔍</div>
+                            <div>
+                                <div class="step-title">区分想法</div>
+                                <div class="step-description">考察证据质量及其与论点的相关性</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请考察你所收集证据的质量及其与论点的相关性。</p>
+                            <p><strong>💡 AI建议：</strong>批判性筛选信息，注重证据的权威性和适用性。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-knowledge-evidence">请分析证据质量和与论点的关系：</label>
+                            <textarea id="ai-knowledge-evidence" rows="4" placeholder="请分析证据质量和与论点的关系"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep3()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何判断证据的质量')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤2-4: 反思 -->
+                    <div id="ai-step2-4" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">📝</div>
+                            <div>
+                                <div class="step-title">反思</div>
+                                <div class="step-description">综合实验结果</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请综合你的实验结果，形成系统性的认识。</p>
+                            <p><strong>💡 AI建议：</strong>将不同来源的结果进行整合，形成自己的见解。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-knowledge-reflect">请写下你的综合结论：</label>
+                            <textarea id="ai-knowledge-reflect" rows="4" placeholder="请写下你的综合结论"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="completeAIExperiment()">完成AI实验</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何整合实验结果')">咨询AI导师</button>
+                    </div>
+                </div>
+                
+                <!-- 维度3: 理解科学本质 -->
+                <div class="dimension" id="ai-dimension3">
+                    <div class="dimension-header">
+                        <div class="dimension-number">3</div>
+                        <div>
+                            <div class="dimension-title">理解科学本质 (Understand Nature of Science)</div>
+                            <div class="dimension-description">AI导师将帮助你理解科学研究的本质特征，培养科学思维和批判性思考能力</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dimension-tabs">
+                        <button class="dimension-tab active" onclick="showAIDimensionStep('ai-step3-1')">激发想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step3-2')">添加想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step3-3')">区分想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step3-4')">反思</button>
+                    </div>
+                    
+                    <!-- 步骤3-1: 激发想法 -->
+                    <div id="ai-step3-1" class="dimension-step active">
+                        <div class="step-header">
+                            <div class="step-icon">💭</div>
+                            <div>
+                                <div class="step-title">激发想法</div>
+                                <div class="step-description">表达对科学研究经历的期望</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请表达你对科学研究经历的期望。</p>
+                            <p><strong>💡 AI建议：</strong>思考科研带给你的成长和挑战。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-science-expectation">请写下你的期望和想法：</label>
+                            <textarea id="ai-science-expectation" rows="4" placeholder="请写下你的期望和想法"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep1()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('科研经历能带来哪些成长')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤3-2: 添加想法 -->
+                    <div id="ai-step3-2" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">👥</div>
+                            <div>
+                                <div class="step-title">添加想法</div>
+                                <div class="step-description">参加组会，体验实验失败</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请积极参加组会，勇于面对和总结实验失败的经验。</p>
+                            <p><strong>💡 AI建议：</strong>失败是科研常态，善于总结经验尤为重要。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-science-failure">请记录你的组会参与和失败经历：</label>
+                            <textarea id="ai-science-failure" rows="4" placeholder="请记录你的组会参与和失败经历"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep2()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何面对科研失败')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤3-3: 区分想法 -->
+                    <div id="ai-step3-3" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🔄</div>
+                            <div>
+                                <div class="step-title">区分想法</div>
+                                <div class="step-description">汇报进展并在小组中比较想法</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请汇报你的研究进展，并在小组中与他人比较和交流想法。</p>
+                            <p><strong>💡 AI建议：</strong>多听取他人意见，完善自己的思路。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-science-report">请写下你的进展汇报和小组讨论体会：</label>
+                            <textarea id="ai-science-report" rows="4" placeholder="请写下你的进展汇报和小组讨论体会"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep3()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何有效进行小组交流')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤3-4: 反思 -->
+                    <div id="ai-step3-4" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🤔</div>
+                            <div>
+                                <div class="step-title">反思</div>
+                                <div class="step-description">思考科学发现如何在迭代过程中产生</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请思考科学发现是如何在不断迭代中产生的。</p>
+                            <p><strong>�� AI建议：</strong>关注过程性、反复性，理解科学探索的本质。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-science-reflect">请写下你的反思和体会：</label>
+                            <textarea id="ai-science-reflect" rows="4" placeholder="请写下你的反思和体会"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="completeAIExperiment()">完成AI实验</button>
+                        <button class="btn btn-secondary" onclick="askAI('科学发现的本质是什么')">咨询AI导师</button>
+                    </div>
+                </div>
+                
+                <!-- 维度4: 发展科学身份认同 -->
+                <div class="dimension" id="ai-dimension4">
+                    <div class="dimension-header">
+                        <div class="dimension-number">4</div>
+                        <div>
+                            <div class="dimension-title">发展科学身份认同 (Develop Identity in Science)</div>
+                            <div class="dimension-description">AI导师将帮助你建立科学身份认同，规划科研职业发展，培养科研自信</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dimension-tabs">
+                        <button class="dimension-tab active" onclick="showAIDimensionStep('ai-step4-1')">激发想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step4-2')">添加想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step4-3')">区分想法</button>
+                        <button class="dimension-tab" onclick="showAIDimensionStep('ai-step4-4')">反思</button>
+                    </div>
+                    
+                    <!-- 步骤4-1: 激发想法 -->
+                    <div id="ai-step4-1" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🎯</div>
+                            <div>
+                                <div class="step-title">激发想法</div>
+                                <div class="step-description">分享个人和职业目标与科研经历的关系</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请分享你的个人和职业目标与科研经历的关系。</p>
+                            <p><strong>💡 AI建议：</strong>思考科研经历如何助力你的职业发展。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-identity-goal">请写下你的目标和与科研的关联：</label>
+                            <textarea id="ai-identity-goal" rows="4" placeholder="请写下你的目标和与科研的关联"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep1()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('科研经历如何帮助职业发展')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤4-2: 添加想法 -->
+                    <div id="ai-step4-2" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🤝</div>
+                            <div>
+                                <div class="step-title">添加想法</div>
+                                <div class="step-description">参与团队的社交网络</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请积极参与团队的社交网络，拓展学术人脉。</p>
+                            <p><strong>💡 AI建议：</strong>主动融入团队，建立良好合作关系。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-identity-social">请记录你的团队互动和社交活动：</label>
+                            <textarea id="ai-identity-social" rows="4" placeholder="请记录你的团队互动和社交活动"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep2()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何建立学术人脉')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤4-3: 区分想法 -->
+                    <div id="ai-step4-3" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">👂</div>
+                            <div>
+                                <div class="step-title">区分想法</div>
+                                <div class="step-description">体验批评过程如何促进科研进步，团队分享想法</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请体验批评过程如何促进科研进步，并与团队成员分享你的想法。</p>
+                            <p><strong>💡 AI建议：</strong>善于接纳批评，团队协作能提升研究质量。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-identity-criticism">请写下你接受批评和团队分享的经历：</label>
+                            <textarea id="ai-identity-criticism" rows="4" placeholder="请写下你接受批评和团队分享的经历"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="submitAIStep3()">提交给AI导师</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何正确面对批评')">咨询AI导师</button>
+                    </div>
+                    
+                    <!-- 步骤4-4: 反思 -->
+                    <div id="ai-step4-4" class="dimension-step">
+                        <div class="step-header">
+                            <div class="step-icon">🌟</div>
+                            <div>
+                                <div class="step-title">反思</div>
+                                <div class="step-description">认识与职业目标相关的自身优势</div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-guidance">
+                            <h5><span class="ai-icon">🤖</span>AI导师指导</h5>
+                            <p>请认识和总结你在科研中展现的优势，这些优势如何与职业目标相关。</p>
+                            <p><strong>💡 AI建议：</strong>发掘自身特长，明确未来发展方向。</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ai-identity-strength">请写下你的优势和职业规划：</label>
+                            <textarea id="ai-identity-strength" rows="4" placeholder="请写下你的优势和职业规划"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="completeAIExperiment()">完成AI实验</button>
+                        <button class="btn btn-secondary" onclick="askAI('如何发掘自身优势')">咨询AI导师</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI反馈区域 -->
+            <div id="ai-feedback-area" class="ai-feedback-area">
+                <h4><span class="ai-icon">🤖</span>AI导师反馈</h4>
+                <div id="ai-feedback-content" class="feedback-content"></div>
+            </div>
+        </div>
+        
+        <!-- AI聊天区域 -->
+        <div class="ai-chat-area">
+            <div class="chat-header">
+                💬 AI导师实时对话
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        你好！我是你的AI科研导师。我可以帮助你进行科研训练，回答你的问题，并提供个性化指导。请告诉我你想从哪个维度开始学习？
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="输入你的问题..." onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-send" onclick="sendMessage()">➤</button>
+                </div>
+                
+                <div class="quick-questions">
+                    <div class="quick-question" onclick="askAI('如何选择一个好的研究问题')">如何选择研究问题</div>
+                    <div class="quick-question" onclick="askAI('请推荐一些相关文献')">推荐相关文献</div>
+                    <div class="quick-question" onclick="askAI('如何设计研究方法')">研究方法设计</div>
+                    <div class="quick-question" onclick="askAI('如何分析数据')">数据分析方法</div>
+                    <div class="quick-question" onclick="askAI('如何培养科学思维')">培养科学思维</div>
+                    <div class="quick-question" onclick="askAI('如何规划科研职业发展')">职业发展规划</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let aiProgress = 0;
+        let currentDimension = 'ai-dimension1';
+        let currentStep = 'ai-step1-1';
+        
+        // 维度切换
+        function showAIDimension(dimensionId) {
+            document.querySelectorAll('.dimension').forEach(dim => dim.classList.remove('active'));
+            document.getElementById(dimensionId).classList.add('active');
+            
+            document.querySelectorAll('.dimension-nav-tab').forEach(tab => tab.classList.remove('active'));
+            const tabBtn = Array.from(document.querySelectorAll('.dimension-nav-tab')).find(btn => btn.getAttribute('onclick').includes(dimensionId));
+            if(tabBtn) tabBtn.classList.add('active');
+            
+            currentDimension = dimensionId;
+            
+            // 重置步骤
+            const steps = document.getElementById(dimensionId).querySelectorAll('.dimension-step');
+            steps.forEach((step, idx) => {
+                step.classList.remove('active');
+                if(idx === 0) step.classList.add('active');
+            });
+            
+            const tabs = document.getElementById(dimensionId).querySelectorAll('.dimension-tab');
+            tabs.forEach((tab, idx) => {
+                tab.classList.remove('active');
+                if(idx === 0) tab.classList.add('active');
+            });
+            
+            currentStep = steps[0].id;
+            
+            // AI欢迎消息
+            addAIMessage(`欢迎来到${getDimensionName(dimensionId)}！我将为你提供个性化的AI指导。`);
+        }
+        
+        // 步骤切换
+        function showAIDimensionStep(stepId) {
+            const step = document.getElementById(stepId);
+            const dimension = step.closest('.dimension');
+            
+            dimension.querySelectorAll('.dimension-step').forEach(s => s.classList.remove('active'));
+            step.classList.add('active');
+            
+            dimension.querySelectorAll('.dimension-tab').forEach(tab => tab.classList.remove('active'));
+            const tabBtn = Array.from(dimension.querySelectorAll('.dimension-tab')).find(btn => btn.getAttribute('onclick').includes(stepId));
+            if(tabBtn) tabBtn.classList.add('active');
+            
+            currentStep = stepId;
+            
+            // AI步骤指导
+            addAIMessage(`现在进入${getStepName(stepId)}阶段，让我为你提供专业指导。`);
+        }
+        
+        // 更新进度
+        function updateAIProgress(percentage) {
+            aiProgress = percentage;
+            document.getElementById('ai-progress').style.width = percentage + '%';
+            document.getElementById('progress-percentage').textContent = percentage + '%';
+        }
+        
+        // 提交步骤
+        function submitAIStep1() {
+            updateAIProgress(25);
+            showAIFeedback('你的研究问题思考得很深入！建议继续完善下一步内容。');
+            setTimeout(() => {
+                const activeDim = document.querySelector('.dimension.active');
+                const activeStep = activeDim.querySelector('.dimension-step.active');
+                const allSteps = Array.from(activeDim.querySelectorAll('.dimension-step'));
+                const idx = allSteps.indexOf(activeStep);
+                if(idx !== -1 && idx < allSteps.length - 1) {
+                    showAIDimensionStep(allSteps[idx + 1].id);
+                }
+            }, 2000);
+        }
+        
+        function submitAIStep2() {
+            updateAIProgress(50);
+            showAIFeedback('信息补充充分！建议进入分析与辨析环节。');
+            setTimeout(() => {
+                const activeDim = document.querySelector('.dimension.active');
+                const activeStep = activeDim.querySelector('.dimension-step.active');
+                const allSteps = Array.from(activeDim.querySelectorAll('.dimension-step'));
+                const idx = allSteps.indexOf(activeStep);
+                if(idx !== -1 && idx < allSteps.length - 1) {
+                    showAIDimensionStep(allSteps[idx + 1].id);
+                }
+            }, 2000);
+        }
+        
+        function submitAIStep3() {
+            updateAIProgress(75);
+            showAIFeedback('分析到位！建议进行最终反思与总结。');
+            setTimeout(() => {
+                const activeDim = document.querySelector('.dimension.active');
+                const activeStep = activeDim.querySelector('.dimension-step.active');
+                const allSteps = Array.from(activeDim.querySelectorAll('.dimension-step'));
+                const idx = allSteps.indexOf(activeStep);
+                if(idx !== -1 && idx < allSteps.length - 1) {
+                    showAIDimensionStep(allSteps[idx + 1].id);
+                }
+            }, 2000);
+        }
+        
+        function completeAIExperiment() {
+            updateAIProgress(100);
+            showAIFeedback('恭喜你完成本维度全部训练！AI导师对你的表现非常满意。');
+            setTimeout(() => {
+                alert('🎉 恭喜！你已完成AI辅助科研训练。请继续参与后续评估。');
+            }, 2000);
+        }
+        
+        // AI聊天功能
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if(message) {
+                addUserMessage(message);
+                input.value = '';
+                
+                // 模拟AI回复
+                setTimeout(() => {
+                    const aiResponse = generateAIResponse(message);
+                    addAIMessage(aiResponse);
+                }, 1000);
+            }
+        }
+        
+        function handleChatKeyPress(event) {
+            if(event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function askAI(question) {
+            addUserMessage(question);
+            setTimeout(() => {
+                const aiResponse = generateAIResponse(question);
+                addAIMessage(aiResponse);
+            }, 1000);
+        }
+        
+        function addUserMessage(message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">👤</div>
+                <div class="message-content">${message}</div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function addAIMessage(message) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">${message}</div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateAIResponse(message) {
+            const responses = {
+                '如何选择研究问题': '选择研究问题时，建议考虑以下几点：1) 问题的重要性和社会价值；2) 研究的可行性和资源可获得性；3) 你的兴趣和专业背景；4) 现有研究的空白点。',
+                '推荐相关文献': '基于你当前的研究方向，我推荐以下文献：1) 核心理论文献；2) 最新研究进展；3) 方法论相关文献。你可以在右侧输入具体的研究主题，我会为你提供更精准的推荐。',
+                '研究方法设计': '研究方法设计需要考虑：1) 研究类型（定性/定量/混合）；2) 数据收集方法；3) 样本选择策略；4) 分析工具和技术。',
+                '数据分析方法': '数据分析方法选择取决于：1) 数据类型；2) 研究问题；3) 样本大小；4) 研究假设。',
+                '如何培养科学思维': '培养科学思维需要：1) 保持好奇心和怀疑精神；2) 学会批判性思考；3) 理解科学方法的本质；4) 接受失败和不确定性。',
+                '如何规划科研职业发展': '科研职业发展规划包括：1) 明确个人兴趣和优势；2) 设定短期和长期目标；3) 建立学术网络；4) 持续学习和技能提升。',
+                '如何评估我的知识储备': '评估知识储备可以从：1) 核心概念掌握程度；2) 相关领域了解广度；3) 最新研究进展熟悉度；4) 实践应用能力等方面进行。',
+                '如何评估文献质量': '评估文献质量时关注：1) 期刊影响因子和声誉；2) 研究方法的严谨性；3) 样本的代表性；4) 结论的逻辑性和证据支持。',
+                '如何从失败中学习': '从失败中学习需要：1) 保持积极心态；2) 分析失败原因；3) 总结经验教训；4) 调整研究策略。',
+                '如何有效进行学术交流': '有效学术交流包括：1) 清晰表达观点；2) 倾听他人意见；3) 建设性讨论；4) 建立合作关系。',
+                '如何建立科研网络': '建立科研网络可以通过：1) 参加学术会议；2) 加入研究团队；3) 利用社交媒体；4) 主动联系同行专家。',
+                '如何有效接纳批评': '有效接纳批评需要：1) 保持开放心态；2) 区分建设性和非建设性批评；3) 理性分析反馈；4) 制定改进计划。'
+            };
+            
+            for(const [key, response] of Object.entries(responses)) {
+                if(message.includes(key)) {
+                    return response;
+                }
+            }
+            
+            return '这是一个很好的问题！让我为你提供专业的建议和指导。你可以继续详细描述你的具体需求，我会给出更有针对性的回答。';
+        }
+        
+        // 辅助函数
+        function fillSuggestion(elementId, text) {
+            document.getElementById(elementId).value = text;
+        }
+        
+        function showAIFeedback(feedback) {
+            document.getElementById('ai-feedback-content').innerHTML = feedback;
+            document.getElementById('ai-feedback-area').style.display = 'block';
+            document.getElementById('ai-feedback-area').scrollIntoView({behavior: 'smooth'});
+        }
+        
+        function getDimensionName(dimensionId) {
+            const names = {
+                'ai-dimension1': '科研实践能力提升',
+                'ai-dimension2': '拓展内容知识',
+                'ai-dimension3': '理解科学本质',
+                'ai-dimension4': '发展身份认同'
+            };
+            return names[dimensionId] || '未知维度';
+        }
+        
+        function getStepName(stepId) {
+            const names = {
+                'ai-step1-1': '激发想法',
+                'ai-step1-2': '添加想法',
+                'ai-step1-3': '区分想法',
+                'ai-step1-4': '反思',
+                'ai-step2-1': '激发想法',
+                'ai-step2-2': '添加想法',
+                'ai-step2-3': '区分想法',
+                'ai-step2-4': '反思',
+                'ai-step3-1': '激发想法',
+                'ai-step3-2': '添加想法',
+                'ai-step3-3': '区分想法',
+                'ai-step3-4': '反思',
+                'ai-step4-1': '激发想法',
+                'ai-step4-2': '添加想法',
+                'ai-step4-3': '区分想法',
+                'ai-step4-4': '反思'
+            };
+            return names[stepId] || '未知步骤';
+        }
+        
+        // 页面初始化
+        window.onload = function() {
+            updateAIProgress(0);
+            showAIDimension('ai-dimension1');
+        };
+    </script>
+</body>
+</html> 

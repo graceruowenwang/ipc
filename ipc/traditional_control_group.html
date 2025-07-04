@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>传统科研指导对照组</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: calc(100vh - 40px);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e0e7ff;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .dimension-navigation {
+            margin-bottom: 30px;
+        }
+
+        .dimension-navigation h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .dimension-navigation p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .dimension-nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .dimension-nav-tab {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dimension-nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .dimension-nav-tab:hover::before {
+            left: 100%;
+        }
+
+        .dimension-nav-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-tab-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .nav-tab-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-tab-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .dimension {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .dimension.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dimension-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+
+        .dimension-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .dimension-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dimension-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .dimension-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .dimension-tab {
+            flex: 1;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .dimension-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .dimension-step {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid #f0f0f0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .dimension-step.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .step-icon {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .mentor-interaction {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+            color: #555;
+            box-shadow: none;
+            text-shadow: none;
+            position: static;
+        }
+        .mentor-interaction h5 {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            text-shadow: none;
+        }
+        .mentor-icon {
+            font-size: 1.3rem;
+            margin-right: 8px;
+            text-shadow: none;
+            filter: none;
+        }
+        .mentor-interaction p, .mentor-interaction ul, .mentor-interaction li {
+            color: #555;
+            font-weight: 400;
+            text-shadow: none;
+            margin-bottom: 8px;
+        }
+        .mentor-interaction ul {
+            margin-left: 20px;
+        }
+        .mentor-interaction li {
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        #mentor-feedback-area {
+            display: none;
+            margin-top: 30px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .feedback-item h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .feedback-item ul {
+            margin: 0 0 15px 20px;
+        }
+
+        .feedback-item li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>传统科研指导对照组</h1>
+        <p>通过传统导师指导，提升科研能力</p>
+    </div>
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="control-progress"></div>
+        </div>
+        <div class="progress-text">学习进度: <span id="progress-percentage">0%</span></div>
+    </div>
+    <!-- 维度导航 -->
+    <div class="dimension-navigation">
+        <h3>🎯 选择学习维度</h3>
+        <p>请选择你想要重点发展的科研能力维度：</p>
+        <div class="dimension-nav-tabs">
+            <button class="dimension-nav-tab active" onclick="showControlDimension('control-dimension1')">
+                <span class="nav-tab-icon">🔬</span>
+                <div class="nav-tab-title">科研实践能力</div>
+                <div class="nav-tab-desc">提升科研实践技能</div>
+            </button>
+            <button class="dimension-nav-tab" onclick="showControlDimension('control-dimension2')">
+                <span class="nav-tab-icon">📚</span>
+                <div class="nav-tab-title">拓展内容知识</div>
+                <div class="nav-tab-desc">建立系统知识体系</div>
+            </button>
+            <button class="dimension-nav-tab" onclick="showControlDimension('control-dimension3')">
+                <span class="nav-tab-icon">🔍</span>
+                <div class="nav-tab-title">理解科学本质</div>
+                <div class="nav-tab-desc">培养科学思维</div>
+            </button>
+            <button class="dimension-nav-tab" onclick="showControlDimension('control-dimension4')">
+                <span class="nav-tab-icon">🎯</span>
+                <div class="nav-tab-title">发展身份认同</div>
+                <div class="nav-tab-desc">规划科研职业发展</div>
+            </button>
+        </div>
+    </div>
+    <!-- 维度内容区 -->
+    <div class="research-dimensions">
+        <!-- 维度1: 科研实践能力提升 -->
+        <div class="dimension active" id="control-dimension1">
+            <div class="dimension-header">
+                <div class="dimension-number">1</div>
+                <div>
+                    <div class="dimension-title">科研实践能力提升 (Develop Practices)</div>
+                    <div class="dimension-description">通过传统导师指导，提升你的科研实践技能，包括问题提出、实验设计、数据分析等核心能力</div>
+                </div>
+            </div>
+            <div class="dimension-tabs">
+                <button class="dimension-tab active" onclick="showControlDimensionStep('control-step1-1')">激发想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step1-2')">添加想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step1-3')">区分想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step1-4')">反思</button>
+            </div>
+            <!-- 步骤1-1: 激发想法 -->
+            <div id="control-step1-1" class="dimension-step active">
+                <div class="step-header">
+                    <div class="step-icon">🔍</div>
+                    <div>
+                        <div class="step-title">激发想法</div>
+                        <div class="step-description">在实验室研究目标背景下，识别或提出一个研究问题</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请结合实验室的研究目标，识别或提出一个你感兴趣的研究问题。</p>
+                    <p><strong>💡 导师建议：</strong>建议从实际科研现象出发，结合团队目标，提出具有创新性和可行性的问题。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-practice-question">请描述你提出的研究问题：</label>
+                    <textarea id="control-practice-question" rows="4" placeholder="请描述你提出的研究问题"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep1()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤1-2: 添加想法 -->
+            <div id="control-step1-2" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">🧪</div>
+                    <div>
+                        <div class="step-title">添加想法</div>
+                        <div class="step-description">开展实验，收集和整理数据</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请开展实验，收集并整理相关数据。</p>
+                    <p><strong>💡 导师建议：</strong>注意实验步骤的规范性，数据要及时整理归档。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-practice-data">请记录你的实验过程和数据收集情况：</label>
+                    <textarea id="control-practice-data" rows="4" placeholder="请记录你的实验过程和数据收集情况"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep2()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤1-3: 区分想法 -->
+            <div id="control-step1-3" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">📊</div>
+                    <div>
+                        <div class="step-title">区分想法</div>
+                        <div class="step-description">分析和解释数据，评估证据，批判结论</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请分析和解释你的实验数据，评估证据，并对结论进行批判性思考。</p>
+                    <p><strong>💡 导师建议：</strong>尝试多角度分析数据，发现潜在问题或局限。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-practice-analysis">请填写你的数据分析、证据评估和结论批判：</label>
+                    <textarea id="control-practice-analysis" rows="4" placeholder="请填写你的数据分析、证据评估和结论批判"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep3()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤1-4: 反思 -->
+            <div id="control-step1-4" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">📝</div>
+                    <div>
+                        <div class="step-title">反思</div>
+                        <div class="step-description">得出最终结论并规划下一步</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请总结你的最终结论，并规划下一步研究计划。</p>
+                    <p><strong>💡 导师建议：</strong>反思整个过程，明确下一步目标。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-practice-reflect">请写下你的结论和后续计划：</label>
+                    <textarea id="control-practice-reflect" rows="4" placeholder="请写下你的结论和后续计划"></textarea>
+                </div>
+                <button class="btn" onclick="completeControlExperiment()">完成传统实验</button>
+            </div>
+        </div>
+        <!-- 维度2: 拓展内容知识 -->
+        <div class="dimension" id="control-dimension2">
+            <div class="dimension-header">
+                <div class="dimension-number">2</div>
+                <div>
+                    <div class="dimension-title">拓展内容知识 (Expand Content Knowledge)</div>
+                    <div class="dimension-description">通过传统导师指导，拓展你的专业知识，建立系统的知识体系</div>
+                </div>
+            </div>
+            <div class="dimension-tabs">
+                <button class="dimension-tab active" onclick="showControlDimensionStep('control-step2-1')">激发想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step2-2')">添加想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step2-3')">区分想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step2-4')">反思</button>
+            </div>
+            <!-- 步骤2-1: 激发想法 -->
+            <div id="control-step2-1" class="dimension-step active">
+                <div class="step-header">
+                    <div class="step-icon">💡</div>
+                    <div>
+                        <div class="step-title">激发想法</div>
+                        <div class="step-description">针对研究主题提出假设和问题</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请针对你的研究主题，提出假设和相关科学问题。</p>
+                    <p><strong>💡 导师建议：</strong>多查阅文献，结合前沿动态提出有价值的问题。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-knowledge-hypothesis">请写下你的假设和问题：</label>
+                    <textarea id="control-knowledge-hypothesis" rows="4" placeholder="请写下你的假设和问题"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep1()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤2-2: 添加想法 -->
+            <div id="control-step2-2" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">📚</div>
+                    <div>
+                        <div class="step-title">添加想法</div>
+                        <div class="step-description">阅读文献，参加研讨会，与团队讨论</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请阅读相关文献，参加学术研讨会，并与研究团队讨论。</p>
+                    <p><strong>💡 导师建议：</strong>主动与团队成员交流，获取多元观点。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-knowledge-activity">请记录你阅读的文献、参加的活动和讨论要点：</label>
+                    <textarea id="control-knowledge-activity" rows="4" placeholder="请记录你阅读的文献、参加的活动和讨论要点"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep2()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤2-3: 区分想法 -->
+            <div id="control-step2-3" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">🔍</div>
+                    <div>
+                        <div class="step-title">区分想法</div>
+                        <div class="step-description">考察证据质量及其与论点的相关性</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请考察你所收集证据的质量及其与论点的相关性。</p>
+                    <p><strong>💡 导师建议：</strong>批判性筛选信息，注重证据的权威性和适用性。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-knowledge-evidence">请分析证据质量和与论点的关系：</label>
+                    <textarea id="control-knowledge-evidence" rows="4" placeholder="请分析证据质量和与论点的关系"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep3()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤2-4: 反思 -->
+            <div id="control-step2-4" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">📝</div>
+                    <div>
+                        <div class="step-title">反思</div>
+                        <div class="step-description">综合实验结果</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请综合你的实验结果，形成系统性的认识。</p>
+                    <p><strong>💡 导师建议：</strong>将不同来源的结果进行整合，形成自己的见解。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-knowledge-reflect">请写下你的综合结论：</label>
+                    <textarea id="control-knowledge-reflect" rows="4" placeholder="请写下你的综合结论"></textarea>
+                </div>
+                <button class="btn" onclick="completeControlExperiment()">完成传统实验</button>
+            </div>
+        </div>
+        <!-- 维度3: 理解科学本质 -->
+        <div class="dimension" id="control-dimension3">
+            <div class="dimension-header">
+                <div class="dimension-number">3</div>
+                <div>
+                    <div class="dimension-title">理解科学本质 (Understand Nature of Science)</div>
+                    <div class="dimension-description">通过传统导师指导，理解科学研究的本质特征，培养科学思维</div>
+                </div>
+            </div>
+            <div class="dimension-tabs">
+                <button class="dimension-tab active" onclick="showControlDimensionStep('control-step3-1')">激发想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step3-2')">添加想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step3-3')">区分想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step3-4')">反思</button>
+            </div>
+            <!-- 步骤3-1: 激发想法 -->
+            <div id="control-step3-1" class="dimension-step active">
+                <div class="step-header">
+                    <div class="step-icon">💭</div>
+                    <div>
+                        <div class="step-title">激发想法</div>
+                        <div class="step-description">表达对科学研究经历的期望</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请表达你对科学研究经历的期望。</p>
+                    <p><strong>💡 导师建议：</strong>思考科研带给你的成长和挑战。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-science-expectation">请写下你的期望和想法：</label>
+                    <textarea id="control-science-expectation" rows="4" placeholder="请写下你的期望和想法"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep1()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤3-2: 添加想法 -->
+            <div id="control-step3-2" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">👥</div>
+                    <div>
+                        <div class="step-title">添加想法</div>
+                        <div class="step-description">参加组会，体验实验失败</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请积极参加组会，勇于面对和总结实验失败的经验。</p>
+                    <p><strong>💡 导师建议：</strong>失败是科研常态，善于总结经验尤为重要。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-science-failure">请记录你的组会参与和失败经历：</label>
+                    <textarea id="control-science-failure" rows="4" placeholder="请记录你的组会参与和失败经历"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep2()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤3-3: 区分想法 -->
+            <div id="control-step3-3" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">🔄</div>
+                    <div>
+                        <div class="step-title">区分想法</div>
+                        <div class="step-description">汇报进展并在小组中比较想法</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请汇报你的研究进展，并在小组中与他人比较和交流想法。</p>
+                    <p><strong>💡 导师建议：</strong>多听取他人意见，完善自己的思路。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-science-report">请写下你的进展汇报和小组讨论体会：</label>
+                    <textarea id="control-science-report" rows="4" placeholder="请写下你的进展汇报和小组讨论体会"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep3()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤3-4: 反思 -->
+            <div id="control-step3-4" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">🤔</div>
+                    <div>
+                        <div class="step-title">反思</div>
+                        <div class="step-description">思考科学发现如何在迭代过程中产生</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请思考科学发现是如何在不断迭代中产生的。</p>
+                    <p><strong>💡 导师建议：</strong>关注过程性、反复性，理解科学探索的本质。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-science-reflect">请写下你的反思和体会：</label>
+                    <textarea id="control-science-reflect" rows="4" placeholder="请写下你的反思和体会"></textarea>
+                </div>
+                <button class="btn" onclick="completeControlExperiment()">完成传统实验</button>
+            </div>
+        </div>
+        <!-- 维度4: 发展科学身份认同 -->
+        <div class="dimension" id="control-dimension4">
+            <div class="dimension-header">
+                <div class="dimension-number">4</div>
+                <div>
+                    <div class="dimension-title">发展科学身份认同 (Develop Identity in Science)</div>
+                    <div class="dimension-description">通过传统导师指导，帮助学生建立科学身份认同，规划科研职业发展</div>
+                </div>
+            </div>
+            <div class="dimension-tabs">
+                <button class="dimension-tab active" onclick="showControlDimensionStep('control-step4-1')">激发想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step4-2')">添加想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step4-3')">区分想法</button>
+                <button class="dimension-tab" onclick="showControlDimensionStep('control-step4-4')">反思</button>
+            </div>
+            <!-- 步骤4-1: 激发想法 -->
+            <div id="control-step4-1" class="dimension-step active">
+                <div class="step-header">
+                    <div class="step-icon">🎯</div>
+                    <div>
+                        <div class="step-title">激发想法</div>
+                        <div class="step-description">分享个人和职业目标与科研经历的关系</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请分享你的个人和职业目标与科研经历的关系。</p>
+                    <p><strong>💡 导师建议：</strong>思考科研经历如何助力你的职业发展。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-identity-goal">请写下你的目标和与科研的关联：</label>
+                    <textarea id="control-identity-goal" rows="4" placeholder="请写下你的目标和与科研的关联"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep1()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤4-2: 添加想法 -->
+            <div id="control-step4-2" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">🤝</div>
+                    <div>
+                        <div class="step-title">添加想法</div>
+                        <div class="step-description">参与团队的社交网络</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请积极参与团队的社交网络，拓展学术人脉。</p>
+                    <p><strong>💡 导师建议：</strong>主动融入团队，建立良好合作关系。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-identity-social">请记录你的团队互动和社交活动：</label>
+                    <textarea id="control-identity-social" rows="4" placeholder="请记录你的团队互动和社交活动"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep2()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤4-3: 区分想法 -->
+            <div id="control-step4-3" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">👂</div>
+                    <div>
+                        <div class="step-title">区分想法</div>
+                        <div class="step-description">体验批评过程如何促进科研进步，团队分享想法</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请体验批评过程如何促进科研进步，并与团队成员分享你的想法。</p>
+                    <p><strong>💡 导师建议：</strong>善于接纳批评，团队协作能提升研究质量。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-identity-criticism">请写下你接受批评和团队分享的经历：</label>
+                    <textarea id="control-identity-criticism" rows="4" placeholder="请写下你接受批评和团队分享的经历"></textarea>
+                </div>
+                <button class="btn" onclick="submitControlStep3()">提交给导师审阅</button>
+            </div>
+            <!-- 步骤4-4: 反思 -->
+            <div id="control-step4-4" class="dimension-step">
+                <div class="step-header">
+                    <div class="step-icon">📈</div>
+                    <div>
+                        <div class="step-title">反思</div>
+                        <div class="step-description">反思科研身份认同</div>
+                    </div>
+                </div>
+                <div class="mentor-interaction">
+                    <h5><span class="mentor-icon">👨‍🏫</span>导师指导：</h5>
+                    <p>请反思你的科研身份认同，思考如何更好地融入科研社区。</p>
+                    <p><strong>💡 导师建议：</strong>持续反思，建立科研自信和归属感。</p>
+                </div>
+                <div class="input-group">
+                    <label for="control-identity-reflection">请反思你的科研身份认同：</label>
+                    <textarea id="control-identity-reflection" rows="4" placeholder="请反思你的科研身份认同"></textarea>
+                </div>
+                <button class="btn" onclick="completeControlExperiment()">完成传统实验</button>
+            </div>
+        </div>
+    </div>
+    <!-- 导师反馈展示区域 -->
+    <div id="mentor-feedback-area">
+        <h3>👨‍🏫 导师反馈</h3>
+        <div id="feedback-content"></div>
+    </div>
+</div>
+<script>
+// 维度切换
+function showControlDimension(dimensionId) {
+    document.querySelectorAll('.dimension').forEach(dim => dim.classList.remove('active'));
+    document.getElementById(dimensionId).classList.add('active');
+    document.querySelectorAll('.dimension-nav-tab').forEach(tab => tab.classList.remove('active'));
+    const tabBtn = Array.from(document.querySelectorAll('.dimension-nav-tab')).find(btn => btn.getAttribute('onclick').includes(dimensionId));
+    if(tabBtn) tabBtn.classList.add('active');
+    // 重置步骤
+    const steps = document.getElementById(dimensionId).querySelectorAll('.dimension-step');
+    steps.forEach((step, idx) => {
+        step.classList.remove('active');
+        if(idx===0) step.classList.add('active');
+    });
+    const tabs = document.getElementById(dimensionId).querySelectorAll('.dimension-tab');
+    tabs.forEach((tab, idx) => {
+        tab.classList.remove('active');
+        if(idx===0) tab.classList.add('active');
+    });
+}
+// 步骤切换
+function showControlDimensionStep(stepId) {
+    const step = document.getElementById(stepId);
+    const dimension = step.closest('.dimension');
+    dimension.querySelectorAll('.dimension-step').forEach(s => s.classList.remove('active'));
+    step.classList.add('active');
+    dimension.querySelectorAll('.dimension-tab').forEach(tab => tab.classList.remove('active'));
+    const tabBtn = Array.from(dimension.querySelectorAll('.dimension-tab')).find(btn => btn.getAttribute('onclick').includes(stepId));
+    if(tabBtn) tabBtn.classList.add('active');
+}
+// 进度条与反馈
+let controlProgress = 0;
+function updateControlProgress(val) {
+    document.getElementById('control-progress').style.width = val+'%';
+    document.getElementById('progress-percentage').textContent = val+'%';
+}
+function showMentorFeedback(html) {
+    document.getElementById('feedback-content').innerHTML = html;
+    document.getElementById('mentor-feedback-area').style.display = 'block';
+    document.getElementById('mentor-feedback-area').scrollIntoView({behavior:'smooth'});
+}
+// 步骤提交与反馈
+function submitControlStep1() {
+    controlProgress = 25;
+    updateControlProgress(controlProgress);
+    showMentorFeedback('<div class="feedback-item"><h4>导师反馈</h4><ul><li>思考深入，建议继续完善下一步内容。</li></ul></div>');
+    setTimeout(()=>{
+        // 自动跳转到下一个步骤
+        const activeDim = document.querySelector('.dimension.active');
+        const activeStep = activeDim.querySelector('.dimension-step.active');
+        const allSteps = Array.from(activeDim.querySelectorAll('.dimension-step'));
+        const idx = allSteps.indexOf(activeStep);
+        if(idx!==-1 && idx<allSteps.length-1) {
+            showControlDimensionStep(allSteps[idx+1].id);
+        }
+    }, 1500);
+}
+function submitControlStep2() {
+    controlProgress = 50;
+    updateControlProgress(controlProgress);
+    showMentorFeedback('<div class="feedback-item"><h4>导师反馈</h4><ul><li>信息补充充分，建议进入分析与辨析环节。</li></ul></div>');
+    setTimeout(()=>{
+        const activeDim = document.querySelector('.dimension.active');
+        const activeStep = activeDim.querySelector('.dimension-step.active');
+        const allSteps = Array.from(activeDim.querySelectorAll('.dimension-step'));
+        const idx = allSteps.indexOf(activeStep);
+        if(idx!==-1 && idx<allSteps.length-1) {
+            showControlDimensionStep(allSteps[idx+1].id);
+        }
+    }, 1500);
+}
+function submitControlStep3() {
+    controlProgress = 75;
+    updateControlProgress(controlProgress);
+    showMentorFeedback('<div class="feedback-item"><h4>导师反馈</h4><ul><li>分析到位，建议进行最终反思与总结。</li></ul></div>');
+    setTimeout(()=>{
+        const activeDim = document.querySelector('.dimension.active');
+        const activeStep = activeDim.querySelector('.dimension-step.active');
+        const allSteps = Array.from(activeDim.querySelectorAll('.dimension-step'));
+        const idx = allSteps.indexOf(activeStep);
+        if(idx!==-1 && idx<allSteps.length-1) {
+            showControlDimensionStep(allSteps[idx+1].id);
+        }
+    }, 1500);
+}
+function completeControlExperiment() {
+    controlProgress = 100;
+    updateControlProgress(controlProgress);
+    showMentorFeedback('<div class="feedback-item"><h4>导师反馈</h4><ul><li>恭喜你完成本维度全部训练！请继续参与后续评估。</li></ul></div>');
+    setTimeout(()=>{
+        alert('🎉 恭喜！你已完成本维度全部训练。请继续参与后续评估。');
+    }, 1200);
+}
+// 页面初始化
+window.onload = function() {
+    updateControlProgress(0);
+    showControlDimension('control-dimension1');
+};
+</script>
+</body>
+</html> 

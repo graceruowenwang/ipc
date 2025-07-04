@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI辅助科研平台 - 随机对照试验</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .random-notice {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #856404;
+        }
+        
+        .random-notice strong {
+            color: #d63031;
+        }
+        
+        .experiment-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .experiment-info h3 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .experiment-info ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .experiment-info li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .framework-info {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .framework-info h3 {
+            color: #28a745;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .citation-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .citation {
+            background: #f8f9fa;
+            border-left: 3px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .citation p {
+            margin-bottom: 8px;
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        .citation a {
+            color: #28a745;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .citation a:hover {
+            text-decoration: underline;
+        }
+        
+        .paper-image {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .pdf-preview {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #28a745;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+        
+        .pdf-preview:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.2);
+            border-color: #20c997;
+        }
+        
+        .pdf-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        
+        .pdf-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .pdf-subtitle {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .pdf-info {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .pdf-info p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        .view-pdf-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .view-pdf-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .image-caption {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        
+        .framework-description h4 {
+            color: #333;
+            font-size: 1.1rem;
+            margin: 20px 0 15px 0;
+        }
+        
+        .framework-description ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .framework-description li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .framework-description p {
+            color: #666;
+            line-height: 1.6;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .group-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .group-card {
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .group-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .group-card:hover::before {
+            left: 100%;
+        }
+        
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+        }
+        
+        .group-card.ai-group:hover {
+            border-color: #667eea;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+        
+        .group-card.control-group:hover {
+            border-color: #28a745;
+            box-shadow: 0 15px 35px rgba(40, 167, 69, 0.3);
+        }
+        
+        .group-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .ai-group .group-icon {
+            color: #667eea;
+        }
+        
+        .control-group .group-icon {
+            color: #28a745;
+        }
+        
+        .group-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .group-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .group-features {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+        
+        .group-features h4 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .group-features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .group-features li {
+            color: #666;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .group-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .ai-group .group-features li::before {
+            color: #667eea;
+        }
+        
+        .enter-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .enter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .control-group .enter-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .control-group .enter-btn:hover {
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px;
+            }
+            
+            .group-selection {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>🎓 AI辅助科研平台</h1>
+            <p>欢迎参与本科生科研能力提升随机对照试验。本平台旨在比较AI辅助指导与传统导师指导对本科生科研能力发展的影响。请根据系统随机分配选择相应的实验组。</p>
+        </div>
+        
+        <div class="random-notice">
+            <strong>💡 使用说明：</strong>请根据您的需求选择进入AI实验组或传统对照组。如需随机分配，请联系研究团队。
+        </div>
+        
+        <div class="experiment-info">
+            <h3>🔬 试验说明</h3>
+            <ul>
+                <li><strong>试验目的：</strong>比较AI辅助指导与传统导师指导对本科生科研能力发展的效果</li>
+                <li><strong>试验设计：</strong>随机对照试验（RCT），确保两组基线平衡</li>
+                <li><strong>学习内容：</strong>四维度知识整合框架（科研实践、内容知识、科学本质、身份认同）</li>
+                <li><strong>试验时长：</strong>预计4-6周，每周2-3次学习活动</li>
+                <li><strong>数据收集：</strong>学习过程数据、能力评估、满意度调查等</li>
+            </ul>
+        </div>
+        
+        <div class="framework-info">
+            <h3>📚 理论框架来源</h3>
+            <div class="citation-box">
+                <p><strong>知识整合框架（Knowledge Integration Framework）</strong>源自以下重要研究：</p>
+                <div class="citation">
+                    <p><strong>Linn, M. C., Palmer, E., Baranger, A., Gerard, E., & Stone, E. (2015).</strong> Undergraduate research experiences: Impacts and opportunities. <em>Science</em>, 347(6222), 1261757.</p>
+                    <p><strong>DOI:</strong> <a href="https://doi.org/10.1126/science.1261757" target="_blank">10.1126/science.1261757</a></p>
+                </div>
+                
+                <div class="paper-image">
+                    <div class="pdf-preview" onclick="openPDF()">
+                        <div class="pdf-icon">📄</div>
+                        <div class="pdf-title">Linn et al. (2015) Science论文</div>
+                        <div class="pdf-subtitle">Undergraduate research experiences: Impacts and opportunities</div>
+                        <div class="pdf-info">
+                            <p><strong>期刊：</strong>Science</p>
+                            <p><strong>卷期：</strong>347(6222)</p>
+                            <p><strong>DOI：</strong>1261757</p>
+                        </div>
+                        <button class="view-pdf-btn">点击查看完整论文</button>
+                    </div>
+                    <div class="image-caption">点击上方区域查看完整PDF论文</div>
+                </div>
+                
+                <div class="framework-image">
+                    <img src="knowledge_integration_framework.png" alt="知识整合框架" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin: 20px 0;">
+                    <div class="image-caption">知识整合框架（Knowledge Integration Framework）示意图</div>
+                </div>
+                
+                <div class="framework-description">
+                    <h4>框架核心内容：</h4>
+                    <ul>
+                        <li><strong>Develop Practices（发展实践能力）：</strong>培养科研实践技能，包括问题提出、实验设计、数据分析等</li>
+                        <li><strong>Expand Content Knowledge（拓展内容知识）：</strong>建立系统专业知识体系，理解核心概念和前沿发展</li>
+                        <li><strong>Understand Nature of Science（理解科学本质）：</strong>培养科学思维，理解科学研究的本质特征</li>
+                        <li><strong>Develop Identity in Science（发展科学身份认同）：</strong>建立科研自信，规划科研职业发展</li>
+                    </ul>
+                    <p><strong>四步学习过程：</strong>每个维度都遵循"激发想法→添加想法→区分想法→反思"的循环学习模式，促进深度知识整合。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="group-selection">
+            <!-- AI实验组 -->
+            <div class="group-card ai-group" onclick="enterAIGroup()">
+                <span class="group-icon">🤖</span>
+                <div class="group-title">AI辅助科研实验组</div>
+                <div class="group-description">
+                    体验AI导师的智能指导，获得个性化的科研训练支持
+                </div>
+                
+                <div class="group-features">
+                    <h4>主要特点：</h4>
+                    <ul>
+                        <li>AI导师实时对话指导</li>
+                        <li>个性化学习建议</li>
+                        <li>智能问题解答</li>
+                        <li>即时反馈与建议</li>
+                        <li>24/7在线支持</li>
+                    </ul>
+                </div>
+                
+                <button class="enter-btn">进入AI实验组</button>
+            </div>
+            
+            <!-- 传统对照组 -->
+            <div class="group-card control-group" onclick="enterControlGroup()">
+                <span class="group-icon">👨‍🏫</span>
+                <div class="group-title">传统科研指导对照组</div>
+                <div class="group-description">
+                    通过传统导师指导方式，提升科研能力
+                </div>
+                
+                <div class="group-features">
+                    <h4>主要特点：</h4>
+                    <ul>
+                        <li>传统导师指导模式</li>
+                        <li>结构化学习路径</li>
+                        <li>定期反馈评估</li>
+                        <li>团队协作学习</li>
+                        <li>经验分享交流</li>
+                    </ul>
+                </div>
+                
+                <button class="enter-btn">进入传统对照组</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 AI辅助科研平台 | 本试验已通过伦理审查 | 如有疑问请联系研究团队</p>
+        </div>
+    </div>
+    
+    <script>
+        // 随机分配逻辑
+        function getRandomGroup() {
+            // 使用时间戳和随机数确保随机性
+            const seed = Date.now() + Math.random();
+            return seed % 2 === 0 ? 'ai' : 'control';
+        }
+        
+        // 打开PDF文件
+        function openPDF() {
+            window.open('ipc/science.1261757.pdf', '_blank');
+        }
+        
+        // 进入AI实验组
+        function enterAIGroup() {
+            // 直接进入AI实验组
+            window.location.href = 'ipc/ai_experimental_group.html';
+        }
+        
+        // 进入传统对照组
+        function enterControlGroup() {
+            // 直接进入传统对照组
+            window.location.href = 'ipc/traditional_control_group.html';
+        }
+        
+        // 随机分配进入（可选功能）
+        function enterRandomGroup() {
+            const assignedGroup = getRandomGroup();
+            if (assignedGroup === 'ai') {
+                window.location.href = 'ipc/ai_experimental_group.html';
+            } else {
+                window.location.href = 'ipc/traditional_control_group.html';
+            }
+        }
+        
+        // 页面加载时显示随机分配结果
+        window.onload = function() {
+            const assignedGroup = getRandomGroup();
+            console.log('随机分配结果:', assignedGroup === 'ai' ? 'AI实验组' : '传统对照组');
+            
+            // 可以在这里添加更复杂的随机分配逻辑
+            // 比如基于用户ID、时间等因素
+        };
+    </script>
+</body>
+</html> 
